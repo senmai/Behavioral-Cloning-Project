@@ -43,17 +43,16 @@ The model.py file contains the code for training and saving the convolution neur
 
 #### 1. An appropriate model architecture has been employed
 
-My model consists of a convolution neural network with 5x5 filter sizes and depths between 24 and 64 (model.py lines 41-45)
-
-The model includes RELU layers to introduce nonlinearity (code line 41-45), and the data is normalized in the model using a Keras lambda layer (code line 39).
+My model consists of a convolution neural network with 3x3 filter sizes and depths between 96 and 256
+The model includes RELU layers to introduce nonlinearity, and the data is normalized in the model using a Keras lambda layer.
 
 #### 2. Attempts to reduce overfitting in the model
 
-The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 53). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
+The model was trained and validated on different data sets to ensure that the model was not overfitting. The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
 
 #### 3. Model parameter tuning
 
-The model used an adam optimizer, so the learning rate was not tuned manually (model.py line 25).
+The model used an adam optimizer, so the learning rate was not tuned manually.
 
 #### 4. Appropriate training data
 
