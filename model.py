@@ -31,25 +31,59 @@ X_train = np.array(augumented_images)
 y_train = np.array(augumented_measurements)
 
 from keras.models import Sequential
-from keras.layers import Flatten,Dense,Lambda,Cropping2D
-from keras.layers.convolutional import Convolution2D
-from keras.layers import MaxPooling2D
+from keras.layers import Flatten,Dense,Lambda,Cropping2D,MaxPooling2D,Dropout,Activation
+from keras.layers.convolutional import Conv2D
+from keras.layers.normalization import BatchNormalization
+from keras.callbacks import EarlyStopping
 
 model = Sequential()
 model.add(Lambda(lambda x: x/255.0 - 0.5,input_shape=(160,320,3)))
-model.add(Cropping2D(cropping=((70,25),(0,0))))
-model.add(Convolution2D(24,5,5,subsample=(2,2),activation="relu"))
-model.add(Convolution2D(36,5,5,subsample=(2,2),activation="relu"))
-model.add(Convolution2D(48,5,5,subsample=(2,2),activation="relu"))
-model.add(Convolution2D(64,3,3,activation="relu"))
-model.add(Convolution2D(64,3,3,activation="relu"))
-
-model.add(Flatten())
-model.add(Dense(100))
-model.add(Dense(50))
-model.add(Dense(10))
+model.add(Cropping2D(cropping=((70,25),(0,0)))) # 160 * 320 * 3
+model.add(Conv2D(96,(5,5),strides=(2,2))) #78 * 158 * 32
+model.add(BatchNormalization())
+model.add(Activation("relu"))
+model.add(Conv2D(128,(5,5),strides=(2,2)))
+model.add(BatchNormalization())
+model.add(Activation("relu")) #37 * 77 * 48
+model.add(MaxPooling2D(2,2)) # 18 * 38 * 48
+model.add(Conv2D(128,(3,3),strides=(1,1))) #16 * 36 * 64
+model.add(BatchNormalization())
+model.add(Activation("relu"))
+model.add(Conv2D(256,(3,3),strides=(1,1)))
+model.add(BatchNormalization())
+model.add(Activation("relu")) #14 * 34 * 128
+model.add(MaxPooling2D(2,2)) # 7 * 17 * 128
+model.add(Flatten()) # 15232
+model.add(Dropout(0.5))
+model.add(Dense(4096))
+model.add(BatchNormalization())
+model.add(Activation("relu"))
+model.add(Dropout(0.5))
+model.add(Dense(2048))
+model.add(BatchNormalization())
+model.add(Activation("relu"))
+model.add(Dropout(0.5))
+model.add(Dense(1024))
+model.add(BatchNormalization())
+model.add(Activation("relu"))
+model.add(Dropout(0.5))
+model.add(Dense(512))
+model.add(BatchNormalization())
+model.add(Activation("relu"))
+model.add(Dropout(0.5))
+model.add(Dense(256))
+model.add(BatchNormalization())
+model.add(Activation("relu"))
+model.add(Dropout(0.5))
+model.add(Dense(128))
+model.add(BatchNormalization())
+model.add(Activation("relu"))
+model.add(Dense(64))
+model.add(BatchNormalization())
+model.add(Activation("relu"))
 model.add(Dense(1))
 model.compile(loss="mse",optimizer="adam")
-model.fit(X_train,y_train,validation_split=0.2,shuffle=True,nb_epoch=3,verbose=1)
-
-model.save("model.h5")
+model.fit(X_train,y_train,callbacks=[EarlyStopping()],validation_split=0.2,shuffle=True,epochs=10,verbose=1)
+print("model saved")
+print("model summary")
+print(model.summary())
