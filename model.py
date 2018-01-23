@@ -1,16 +1,17 @@
 import csv
 import cv2
 import numpy as np
+from keras.preprocessing.image import ImageDataGenerator
 
-lines = []
+samples = []
 with open("./data/driving_log.csv") as csvfile:
     reader = csv.reader(csvfile)
     for line in reader:
-        lines.append(line)
+        samples.append(line)
 
 images = []
 measurements = []
-for line in lines:
+for line in samples:
     for i in range(3):
         source_path = line[i]
         filename = source_path.split("/")[-1]
@@ -35,6 +36,8 @@ from keras.layers import Flatten,Dense,Lambda,Cropping2D,MaxPooling2D,Dropout,Ac
 from keras.layers.convolutional import Conv2D
 from keras.layers.normalization import BatchNormalization
 from keras.callbacks import EarlyStopping
+from keras.preprocessing.image import ImageDataGenerator
+
 
 model = Sequential()
 model.add(Lambda(lambda x: x/255.0 - 0.5,input_shape=(160,320,3)))
@@ -83,7 +86,21 @@ model.add(BatchNormalization())
 model.add(Activation("relu"))
 model.add(Dense(1))
 model.compile(loss="mse",optimizer="adam")
-model.fit(X_train,y_train,callbacks=[EarlyStopping()],validation_split=0.2,shuffle=True,epochs=10,verbose=1)
+
+datagen = ImageDataGenerator(
+    featurewise_center=True,
+    featurewise_std_normalization=True,
+    rotaion_range = 20,
+    width_shift_range=0.2,
+    height_shift_range=0.2,
+    horizontal_flip=True
+)
+
+datagen.fit(X_train)
+model.fit_generator(data.gen.flow(X_train,y_train,batch_size=32),
+        steps_per_epochs=len(X_train)/32,epochs=epochs)
+
 print("model saved")
+model.save("model.h5")
 print("model summary")
 print(model.summary())
